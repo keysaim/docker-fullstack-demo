@@ -1,0 +1,51 @@
+version: "2"
+services:
+    redis-master:
+        build: master
+        image: redis-master
+        container_name: redis-master
+        volumes:
+            - /opt/demo/redis:/data
+
+    redis-slave1:
+        build: slave1
+        image: redis-slave1
+        container_name: redis-slave1
+        links:
+            - redis-master:master
+
+    redis-slave2:
+        build: slave2
+        image: redis-slave2
+        container_name: redis-slave2
+        links:
+            - redis-master:master
+
+    app1:
+        build: app
+        image: app
+        container_name: app1
+        links:
+            - redis-master:redis
+        command: 0.0.0.0:8001
+
+    app2:
+        build: app
+        image: app
+        container_name: app2
+        links:
+            - redis-master:redis
+        command: 0.0.0.0:8002
+
+    haproxy:
+        build: haproxy
+        image: haapp
+        container_name: haproxy
+        links:
+            - app1:app1
+            - app2:app2
+        ports:
+            - 6301:6301
+
+
+
